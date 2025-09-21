@@ -14,6 +14,7 @@ use tokio::runtime::Builder;
 use tracing::info;
 
 use std::process::exit;
+use std::process::Command;
 
 #[cfg(not(target_env = "msvc"))]
 use tikv_jemallocator::Jemalloc;
@@ -33,6 +34,21 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         Some(Commands::Fingerprint { query, path }) => {
             pgdog::cli::fingerprint(query, path)?;
             exit(0);
+        }
+
+        Some(Commands::Psql { ref database, ref user, }) => {
+            #[cfg(unix)]
+            {
+                let _output = Command::new("psql")
+                    .args(&[
+                        "--dbname",
+                        &database.clone().expect("Database argument expected"),
+                        "--user",
+                        &user.clone().expect("User argument expected"),
+                    ])
+                    .spawn()?
+                    .wait();
+            }
         }
 
         Some(Commands::Configcheck { config, users }) => {

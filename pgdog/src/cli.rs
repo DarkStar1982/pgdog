@@ -65,6 +65,15 @@ pub enum Commands {
         users: Option<PathBuf>,
     },
 
+    Psql {
+        /// Path to the configuration file.
+        #[arg(short, long)]
+        database: Option<String>,
+        /// Path to the users.toml file.
+        #[arg(short, long)]
+        user: Option<String>,
+    },
+
     /// Copy data from source to destination cluster
     /// using logical replication.
     DataSync {
