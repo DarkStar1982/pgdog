@@ -46,6 +46,7 @@ impl Listener {
     }
 
     /// Listen for client connections and handle them.
+    #[allow(unreachable_code)]
     pub async fn listen(&mut self) -> Result<(), Error> {
         info!("🐕 PgDog listening on {}", self.addr);
         let listener = TcpListener::bind(&self.addr).await?;
@@ -86,11 +87,13 @@ impl Listener {
                     self.start_shutdown();
                 }
 
-                _ = sigusr.listen() => {
-                    info!("hot-patching signal received");
-                    match current_exe(){
+                _ = sigusr.listen() => 
+                {
+                    info!("Hot-patching signal received");
+                    match current_exe()
+                    {
                         Ok(path) => {
-                            info!("Hot-loading new executable from {}",path.display());
+                            info!("Hot-loading from {}",path.display());
                             let program = CString::new(path.into_os_string().into_encoded_bytes()).unwrap();
                             let args: Vec<CString> = vec![];
                             execv(&program, &args).expect("execv failed");
@@ -114,8 +117,7 @@ impl Listener {
         }
 
         Ok(())
-    }
-
+    }    
     /// Shutdown this listener.
     pub fn shutdown(&self) {
         self.shutdown.notify_one();
@@ -131,7 +133,7 @@ impl Listener {
             shutdown();
         });
     }
-
+    
     async fn execute_shutdown(&self) {
         let shutdown_timeout = config().config.general.shutdown_timeout();
 
